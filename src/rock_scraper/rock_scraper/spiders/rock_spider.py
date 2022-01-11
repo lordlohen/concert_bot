@@ -31,13 +31,13 @@ class ConcertsSpider(scrapy.Spider):
             json.dump(self.data, f, ensure_ascii=False)
 
     @staticmethod
-    def start(genre='', date_from='', date_to=''):
+    def start(genre=' ', date_from='', date_to=''):
         process = CrawlerProcess({
             'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
         })
         if date_from != '' and date_to !='' and genre != '':
             ConcertsSpider.url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?date_from={date_from}&date_to={date_to}&sort=0'
-        elif genre != '':
+        elif genre != ' ':
             ConcertsSpider.url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
         else:
             ConcertsSpider.url = f'https://spb.kassir.ru/bilety-na-koncert/'
