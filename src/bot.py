@@ -1,23 +1,27 @@
 import urllib.request
-
+import redis
+import re
+import pandas as pd
+import locale
+from datetime import datetime
 import telebot
 from telebot import types
 from telebot import custom_filters
-import json
 import time
 
-from rock_scraper.rock_scraper.spiders.rock_spider import ConcertsSpider
+locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+red = redis.Redis(host='localhost', port=6379, db=1, password=None, socket_timeout=None)
 
 token = '5055960243:AAE0ZNGoZnO0BeqEMxGnLrSf9jEyiCTlGR0'
-bot = telebot.TeleBot(token, threaded=False)
+bot = telebot.TeleBot(token, threaded=True)
 
 greeting = "Приветствую, тебя путник. Я помогу тебе выбрать концерт в Питере.\n" \
            "Для поиска используй команду /search"
 
 choice_genre = "Выберите жанр мероприятия:"
-choice_date = "Введите диапозон дат (Пример: 01.01.2022-31.12.2022):"
+choice_date = "Введите диапозон дат (Пример: 01.01-31.12):"
 
-genres_code = ['', 'dance', 'humor', 'shou', 'klassika', 'rock', 'estrada',
+genres_code = ['folk_mer', 'dance', 'humor', 'shou', 'klassika', 'rock', 'estrada',
           'dzhaz', 'folk', 'shanson', 'hip-hop', 'electro',
           'tvorcheskiy-vecher', 'otherkoncert', 'clubs', 'natsionalnye']
 
@@ -79,45 +83,64 @@ def get_genre(message):
 def get_date(message):
     with bot.retrieve_data(message.from_user.id) as data:
         bot.send_message(message.from_user.id, f"Ищем билеты {data['genre']}...")
-        data['date_from'], data['date_to'] = message.text.split('-')
+        data['date'] = message.text
     # bot.register_next_step_handler(message, scrap)
-    scrap(message)
+        scrap(message)
 
 
 def scrap(message):
-    print('got it')
-    with bot.retrieve_data(message.from_user.id) as data:
-        ConcertsSpider.start(data['genre'], data['date_from'], data['date_to'])
+
     bot.send_message(message.from_user.id, 'Еще немного...')
-    bot.delete_state(message.from_user.id)
-    # bot.register_next_step_handler(message, show_concerts)
     show_concerts(message)
 
 
 def show_concerts(message):
-    # bot.send_message(message.from_user.id, 'reading json and send msg')
-    with open('concerts.json') as f:
-        data = json.load(f)
+    bot.send_message(message.from_user.id, 'Got it')
+    with bot.retrieve_data(message.from_user.id) as data:
+        d = []
+        datelist = []
 
-    for t in range(len(data)):
-        img = open('out.jpg', 'wb')
-        img.write(urllib.request.urlopen(data[t]['img']).read())
-        img.close()
-        img = open('out.jpg', 'rb')
+        bot.send_message(message.from_user.id, data['date'])
 
-        markup = types.InlineKeyboardMarkup()
-        open_btn = types.InlineKeyboardButton(text='Купить билет', url=data[t]['href'])
-        markup.add(open_btn)
+        m_f = re.search(r'(?:0?[1-9]|[12][0-9]|3[01]).(?:0?[1-9]|1[0-2])-', data['date']).group()[:-1] + '.22'
+        m_t = re.search(r'-(?:0?[1-9]|[12][0-9]|3[01]).(?:0?[1-9]|1[0-2])', data['date']).group()[1:] + '.22'
+        d_f = datetime.strptime(m_f, '%d.%m.%y').date()
+        d_t = datetime.strptime(m_t, '%d.%m.%y').date()
 
-        bot.send_chat_action(message.from_user.id, 'upload_photo')
-        bot.send_photo(message.from_user.id, img, caption=f"{data[t]['title']}\n{data[t]['time']}\n{data[t]['cost']}",
-                       reply_markup=markup)
-        img.close()
+        for day in pd.date_range(min(d_f, d_t), max(d_f, d_t)):
+            day, month = day.strftime('%d %b').split(' ')
+            datelist.append(f'{day} {month.capitalize()}')
 
-        time.sleep(0.5)
+        for date in datelist:
+            for key in red.scan_iter(f"{data['genre']}:{date}*:*"):
+                for i in red.hscan(key):
+                    if i != 0:
+                        d.append(i)
+
+        for t in range(len(d)):
+            img = open('out.jpg', 'wb')
+            img.write(urllib.request.urlopen(d[t].get(b'img').decode('utf-8')).read())
+            img.close()
+            img = open('out.jpg', 'rb')
+
+            markup = types.InlineKeyboardMarkup()
+            open_btn = types.InlineKeyboardButton(text='Купить билет', url=d[t].get(b'href').decode('utf-8'))
+            markup.add(open_btn)
+
+            bot.send_chat_action(message.from_user.id, 'upload_photo')
+            bot.send_photo(message.from_user.id, img, caption=f"{d[t].get(b'title').decode('utf-8')}\n"
+                                                              f"{d[t].get(b'time').decode('utf-8')}\n"
+                                                              f"{d[t].get(b'cost').decode('utf-8')}",
+                           reply_markup=markup)
+            img.close()
+            if len(d)>10:
+                time.sleep(1)
+            else:
+                time.sleep(0.5)
 
 
 if __name__ == '__main__':
+
     bot.add_custom_filter(custom_filters.StateFilter(bot))
     bot.enable_saving_states()
 
