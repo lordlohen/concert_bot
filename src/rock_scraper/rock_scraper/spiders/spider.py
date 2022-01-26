@@ -1,5 +1,7 @@
 import random
 import urllib.parse
+
+import urllib3.packages.six
 from twisted.internet import reactor
 import redis
 
@@ -17,10 +19,91 @@ class RockSpider(scrapy.Spider):
     name = "rock"
     data = []
     genre = 'rock'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -31,9 +114,10 @@ class RockSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -52,10 +136,91 @@ class DanceSpider(scrapy.Spider):
     name = "dance"
     data = []
     genre = 'dance'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -65,9 +230,10 @@ class DanceSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             yield red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -85,11 +251,92 @@ class DanceSpider(scrapy.Spider):
 class FolkMerSpider(scrapy.Spider):
     name = "folkmer"
     data = []
-    url = 'https://spb.kassir.ru/bilety-na-koncert/?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/?sort=0'
+                ]
+    city = ''
     genre = 'folk_mer'
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -99,9 +346,10 @@ class FolkMerSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             yield red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -120,10 +368,91 @@ class HumorSpider(scrapy.Spider):
     name = "humor"
     data = []
     genre = 'humor'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -134,9 +463,10 @@ class HumorSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -155,10 +485,91 @@ class ShouSpider(scrapy.Spider):
     name = "shou"
     data = []
     genre = 'shou'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -169,9 +580,10 @@ class ShouSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -190,10 +602,91 @@ class KlassikaSpider(scrapy.Spider):
     name = "klassika"
     data = []
     genre = 'klassika'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -204,9 +697,10 @@ class KlassikaSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -225,10 +719,91 @@ class EstradaSpider(scrapy.Spider):
     name = "estrada"
     data = []
     genre = 'estrada'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -239,9 +814,10 @@ class EstradaSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -260,10 +836,91 @@ class DzhazSpider(scrapy.Spider):
     name = "dzhaz"
     data = []
     genre = 'dzhaz'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -274,9 +931,10 @@ class DzhazSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -295,10 +953,91 @@ class FolkSpider(scrapy.Spider):
     name = "folk"
     data = []
     genre = 'folk'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -309,9 +1048,10 @@ class FolkSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -330,10 +1070,91 @@ class ShansonSpider(scrapy.Spider):
     name = "shanson"
     data = []
     genre = 'shanson'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -343,9 +1164,10 @@ class ShansonSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -364,10 +1186,91 @@ class HipHopSpider(scrapy.Spider):
     name = "hip-hop"
     data = []
     genre = 'hip-hop'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -377,9 +1280,10 @@ class HipHopSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -398,10 +1302,91 @@ class ElectroSpider(scrapy.Spider):
     name = "electro"
     data = []
     genre = 'electro'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -411,9 +1396,10 @@ class ElectroSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -432,10 +1418,91 @@ class TvorSpider(scrapy.Spider):
     name = "tvorcheskiy-vecher"
     data = []
     genre = 'tvorcheskiy-vecher'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -445,9 +1512,10 @@ class TvorSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -466,10 +1534,91 @@ class OtherSpider(scrapy.Spider):
     name = "otherkoncerts"
     data = []
     genre = 'otherkoncerts'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -479,9 +1628,10 @@ class OtherSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -500,10 +1650,91 @@ class ClubsSpider(scrapy.Spider):
     name = "clubs"
     data = []
     genre = 'clubs'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -513,9 +1744,10 @@ class ClubsSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
@@ -534,10 +1766,91 @@ class NatsSpider(scrapy.Spider):
     name = "natsionalnye"
     data = []
     genre = 'natsionalnye'
-    url = f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+    url_list = [f'https://spb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://msk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://aba.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://anapa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://arh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://astr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://brn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://belgorod.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://blag.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://bryansk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vl.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vlg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vologda.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://vrn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://gel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ekb.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ivanovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://izhevsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://irk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yola.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kgd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://klg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kemerovo.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kirov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krs.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://krym.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://kursk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lzr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://lipetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://mgn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://murm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nabchelny.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://novokuznetsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://nvrsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://nsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://omsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orenburg.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://orsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pnz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://perm.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ptz.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://pskov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rnd.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://rzn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saransk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://saratov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://smolensk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sochi.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://oskol.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+
+                f'https://sur.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tambov.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tver.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tlt.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tomsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tula.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://tmn.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulan.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ulyanovsk.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://ufa.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://hbr.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chaik.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cheboksary.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chel.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://cher.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://chita.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://sakh.kassir.ru/bilety-na-koncert/{genre}?sort=0',
+                f'https://yar.kassir.ru/bilety-na-koncert/{genre}?sort=0'
+                ]
+    city = ''
 
     def start_requests(self):
-        yield scrapy.Request(url=self.url, callback=self.parse)
+        for url in self.url_list:
+            self.city = url[8:url.index('.')]
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, **kwargs):
         for concert in response.css('div.event-card'):
@@ -547,9 +1860,10 @@ class NatsSpider(scrapy.Spider):
             title = concert.css('div.event-card__caption div.title a::text').get().strip()
             title_encoded = urllib.parse.quote_plus(title)
 
-            key_name = f"{genre}:{time}:{title_encoded}"
+            key_name = f"{self.city}:{genre}:{time}:{title_encoded}"
 
             red.hmset(key_name, {
+                'city': self.city,
                 'genre': genre,
                 'title': title,
                 'img': concert.css('div.poster a img::attr(data-src)').get(),
