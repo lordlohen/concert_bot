@@ -1,5 +1,7 @@
 import random
+import time
 import urllib.parse
+import schedule
 
 import urllib3.packages.six
 from twisted.internet import reactor
@@ -1878,7 +1880,8 @@ class NatsSpider(scrapy.Spider):
             yield scrapy.Request(next_page, callback=self.parse)
 
 
-if __name__ == '__main__':
+def crawling():
+    red.flushdb()
     process = CrawlerProcess({
         'USER_AGENT': agents[random.randint(0, 2)]
     })
@@ -1901,3 +1904,12 @@ if __name__ == '__main__':
     process.crawl(HumorSpider)
 
     process.start()
+    print('Process stoped')
+
+
+if __name__ == '__main__':
+    crawling()
+    schedule.every().monday.at('10:00').do(crawling)
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
