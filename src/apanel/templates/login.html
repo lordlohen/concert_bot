@@ -1,0 +1,22 @@
+<body class="bg-primary bg-gradient">
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<form style="width: 500px; height:200px; margin:15% auto;" method="POST" role="form">
+    <div class="container" style="width: 400px; margin:0 auto; padding:0; padding-top:10px;">
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-danger">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+    <div style="width:400px; margin:0 auto;">
+    {{ form.hidden_tag() }}
+    {{ wtf.form_field(form.password) }}
+    {{ wtf.form_field(form.submit) }}
+    </div>
+</form>
+{% endblock %}
+</body>
