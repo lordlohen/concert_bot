@@ -9,7 +9,7 @@ from src.bot import send_message_to_users, get_all_users
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'JJooPpAa__2106'
-app.permanent_session_lifetime = datetime.timedelta(hours=2)
+# app.permanent_session_lifetime = datetime.timedelta()
 bootstrap = Bootstrap(app)
 password_hash = "pbkdf2:sha256:260000$QsO5vAstZucauOTQ$2e042435463d08f355176a73f0611a8905693544fad09016abc5d3c8d82e20e1"
 
