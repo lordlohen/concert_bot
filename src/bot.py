@@ -13,6 +13,11 @@ locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 red = redis.Redis(host='localhost', port=6379, db=1, password=None, socket_timeout=None)
 redis_users = redis.Redis(host='localhost', port=6379, db=2, password=None, socket_timeout=None)
 
+
+# print(len(red.keys()))
+# for key in red.scan_iter(f"*:rock:*:*"):
+#     print(key)
+
 token = '5055960243:AAE0ZNGoZnO0BeqEMxGnLrSf9jEyiCTlGR0'
 bot = telebot.TeleBot(token, threaded=True)
 
@@ -55,6 +60,16 @@ class States:
     date = 2
     city_changed = 3
     search = 4
+
+
+def send_message_to_users(msg):
+    for i in redis_users.scan_iter('*'):
+        id = i.decode('utf-8')[5::]
+        bot.send_message(id, msg)
+
+
+def get_all_users():
+    return str(redis_users.dbsize())
 
 
 @bot.message_handler(commands=["start"])
@@ -169,10 +184,13 @@ def show_concerts(message):
             dateList.append(f'{day} {month.capitalize()}')
 
         for date in dateList:
-
-            for key in red.scan_iter(f"{data['city']}*:{data['genre']}:{date}*:*"):
+            # print(f'DEBUG: {date}')
+            # print(f"DEBUG: {data['city']}:{data['genre']}:{date}:*")
+            for key in red.scan_iter(f"{data['city']}:{data['genre']}:{date}*:*"):
+                print(f'DEBUG: {key}')
                 for i in red.hscan(key):
                     if i != 0:
+                        print(f'DEBUG: {i}')
                         d.append(i)
 
         for t in range(len(d)):
