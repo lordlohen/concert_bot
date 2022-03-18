@@ -1,0 +1,15 @@
+<body class="bg-primary bg-gradient">
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}New Ad{% endblock %}
+{% block content %}
+<form style="width: 500px; height:200px; margin:15% auto;" method="POST" role="form">
+    <div style="width:400px; margin:0 auto;">
+    {{ form.hidden_tag() }}
+    {{ wtf.form_field(form.area) }}
+    {{ wtf.form_field(form.date) }}
+    {{ wtf.form_field(form.submit) }}
+    </div>
+</form>
+{% endblock %}
+</body>
