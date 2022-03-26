@@ -1,7 +1,7 @@
 <body class="bg-primary bg-gradient">
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block title %}New Ad{% endblock %}
+{% block title %}Ads{% endblock %}
 {% block content %}
 <div style="position: absolute; right: 20px; top:20px">
     <a href="{{url_for('logout')}}"><button type="button" class="btn btn-light">
@@ -19,14 +19,17 @@
         </svg>
     </button></a>
 </div>
-<form style="width: 500px; height:200px; margin:15% auto;" method="POST" role="form">
-    <div style="width:400px; margin:0 auto;">
-    {{ form.hidden_tag() }}
-    {{ wtf.form_field(form.area) }}
-    {{ wtf.form_field(form.date) }}
-    {{ wtf.form_field(form.time) }}
-    {{ wtf.form_field(form.submit) }}
-    </div>
-</form>
+<div style="width: 80%; margin: 0 auto">
+    <h1 class="h1 text-center">Ads</h1>
+    <table class="table table-light">
+        {% for ad in range(ads) %}
+        <tr class="table table-light" style="color: black;">
+            <td style="width: 50px;" class="table table-light">{{ ad_date[ad] }}</td>
+            <td style="width: 20px;" class="table table-light">{{ ad_time[ad] }}</td>
+            <td style="width: 500px;" class="table table-light">{{ ad_text[ad] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
 {% endblock %}
 </body>

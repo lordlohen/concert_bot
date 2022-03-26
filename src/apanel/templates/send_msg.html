@@ -1,7 +1,7 @@
 <body class="bg-primary bg-gradient">
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block title %}New Ad{% endblock %}
+{% block title %}Send Message{% endblock %}
 {% block content %}
 <div style="position: absolute; right: 20px; top:20px">
     <a href="{{url_for('logout')}}"><button type="button" class="btn btn-light">
@@ -22,9 +22,7 @@
 <form style="width: 500px; height:200px; margin:15% auto;" method="POST" role="form">
     <div style="width:400px; margin:0 auto;">
     {{ form.hidden_tag() }}
-    {{ wtf.form_field(form.area) }}
-    {{ wtf.form_field(form.date) }}
-    {{ wtf.form_field(form.time) }}
+    {{ wtf.form_field(form.message) }}
     {{ wtf.form_field(form.submit) }}
     </div>
 </form>
