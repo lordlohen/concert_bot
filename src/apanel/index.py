@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import PasswordField, SubmitField, TextAreaField, DateField, RadioField
 from wtforms.validators import DataRequired
 from werkzeug.security import generate_password_hash, check_password_hash
-import datetime
+from datetime import datetime
 from src.bot import send_message_to_users, get_all_users
 import redis
 
@@ -15,6 +15,24 @@ bootstrap = Bootstrap(app)
 password_hash = "pbkdf2:sha256:260000$QsO5vAstZucauOTQ$2e042435463d08f355176a73f0611a8905693544fad09016abc5d3c8d82e20e1"
 
 ads_base = redis.Redis(host='localhost', port=6379, db=3, password=None, socket_timeout=None)
+
+
+def sortads(ad_list):
+    swapped = True
+    while swapped:
+        swapped = False
+        for i in range(len(ad_list)-1):
+            date1 = datetime.strptime(ad_list[i][0], '%Y-%m-%d')
+            date2 = datetime.strptime(ad_list[i+1][0], '%Y-%m-%d')
+            if date1 > date2:
+                ad_list[i], ad_list[i+1] = ad_list[i+1], ad_list[i]
+                swapped = True
+            time1 = datetime.strptime(ad_list[i][1], '%H:%M')
+            time2 = datetime.strptime(ad_list[i+1][1], '%H:%M')
+            if time1 > time2:
+                ad_list[i], ad_list[i + 1] = ad_list[i + 1], ad_list[i]
+                swapped = True
+    return ad_list
 
 
 def check_login(f):
@@ -67,19 +85,31 @@ def newad():
 @app.route('/ads', methods=['GET'])
 @check_login
 def ads():
-    d = []
     ad_date = []
     ad_time = []
     ad_text = []
+
+    n = 0
+    for key in ads_base.scan_iter('*'):
+        n += 1
+
+    ads_list = [[None] * 3 for i in range(n)]
+
     for key in ads_base.scan_iter('*'):
         for i in ads_base.hscan(key):
             if i != 0:
                 ad_date.append(i.get(b'date').decode('utf-8'))
-                print(i.get(b'date').decode('utf-8'))
                 ad_time.append(i.get(b'time').decode('utf-8'))
                 ad_text.append(i.get(b'text').decode('utf-8'))
 
-    return render_template('ads.html', ad_date=ad_date, ad_text=ad_text, ad_time=ad_time, ads=len(ad_date))
+    for i in range(n):
+        ads_list[i][0] = ad_date[i]
+        ads_list[i][1] = ad_time[i]
+        ads_list[i][2] = ad_text[i]
+
+    ads_list = sortads(ads_list)
+
+    return render_template('ads.html', ads=ads_list, n=len(ads_list))
 
 
 @app.route('/send_msg', methods=['GET', 'POST'])
