@@ -21,6 +21,12 @@
 </div>
 <div style="width: 80%; margin: 0 auto">
     <h1 class="h1 text-center">Ads</h1>
+    <form method="POST" role="form">
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.date) }}
+        {{ wtf.form_field(form.search) }}
+        <a href="{{ url_for('ads', date='') }}"><input type="button" class="btn btn-default" value="Reset"></a>
+    </form>
     <table class="table table-light">
         {% for ad in range(n) %}
         <tr class="table table-light" style="color: black;">

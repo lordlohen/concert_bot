@@ -51,7 +51,7 @@ class LoginForm(FlaskForm):
 
 class NewAdForm(FlaskForm):
     area = TextAreaField('Text', validators=[DataRequired()])
-    date = DateField('Date (Day-Month-Year)', format='%d-%m-%Y', validators=[DataRequired()], id='datepick')
+    date = DateField('Date (Day-Month-Year)', format='%Y-%m-%d', validators=[DataRequired()])
     time = RadioField('Time', choices=['8:00', '12:00', '16:00', '20:00'])
     submit = SubmitField('Add')
 
@@ -59,6 +59,11 @@ class NewAdForm(FlaskForm):
 class MessageForm(FlaskForm):
     message = TextAreaField('Text', validators=[DataRequired()])
     submit = SubmitField('Send')
+
+
+class AdSearchForm(FlaskForm):
+    date = DateField('Search', format='%Y-%m-%d')
+    search = SubmitField('Search')
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -82,26 +87,44 @@ def newad():
     return render_template('newad.html', form=form)
 
 
-@app.route('/ads', methods=['GET'])
+@app.route('/ads/', methods=['GET', 'POST'])
+@app.route('/ads/<date>', methods=['GET', 'POST'])
 @check_login
-def ads():
+def ads(date=''):
+    print(date)
+    form = AdSearchForm()
+
+    if form.validate_on_submit():
+        return redirect(url_for('ads', date=str(form.date.data)))
+
     ad_date = []
     ad_time = []
     ad_text = []
 
     n = 0
-    for key in ads_base.scan_iter('*'):
-        n += 1
+    if date == '':
+        for key in ads_base.scan_iter('*'):
+            n += 1
+    else:
+        for key in ads_base.scan_iter(f"{date}*"):
+            n += 1
 
     ads_list = [[None] * 3 for i in range(n)]
 
-    for key in ads_base.scan_iter('*'):
-        for i in ads_base.hscan(key):
-            if i != 0:
-                ad_date.append(i.get(b'date').decode('utf-8'))
-                ad_time.append(i.get(b'time').decode('utf-8'))
-                ad_text.append(i.get(b'text').decode('utf-8'))
-
+    if date == '':
+        for key in ads_base.scan_iter('*'):
+            for i in ads_base.hscan(key):
+                if i != 0:
+                    ad_date.append(i.get(b'date').decode('utf-8'))
+                    ad_time.append(i.get(b'time').decode('utf-8'))
+                    ad_text.append(i.get(b'text').decode('utf-8'))
+    else:
+        for key in ads_base.scan_iter(f"{date}*"):
+            for i in ads_base.hscan(key):
+                if i != 0:
+                    ad_date.append(i.get(b'date').decode('utf-8'))
+                    ad_time.append(i.get(b'time').decode('utf-8'))
+                    ad_text.append(i.get(b'text').decode('utf-8'))
     for i in range(n):
         ads_list[i][0] = ad_date[i]
         ads_list[i][1] = ad_time[i]
@@ -109,7 +132,7 @@ def ads():
 
     ads_list = sortads(ads_list)
 
-    return render_template('ads.html', ads=ads_list, n=len(ads_list))
+    return render_template('ads.html', ads=ads_list, n=len(ads_list), form=form)
 
 
 @app.route('/send_msg', methods=['GET', 'POST'])
