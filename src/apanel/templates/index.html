@@ -13,9 +13,10 @@
     </button></a>
 </div>
 <div style="width: 80%; margin:0 auto;">
-    <a href="{{url_for('newad')}}"><button type="button" class="btn btn-light" style="color: black;">New Ad</button></a>
-    <a href="{{url_for('ads', date='')}}"><button type="button" class="btn btn-light" style="color: black;">Ads</button></a>
-    <a href="{{url_for('send_msg')}}"><button type="button" class="btn btn-light" style="color: black;">Send Message</button></a>
+    <a href="{{url_for('newad')}}"><input type="submit" class="btn btn-default" style="color: black;" value="New Ad"></a>
+    <a href="{{url_for('ads', date='')}}"><input type="submit" class="btn btn-default" style="color: black;" value="Ads"></a>
+    <a href="{{url_for('send_msg')}}"><input type="submit" class="btn btn-default" style="color: black;" value="Send Message"></a>
+    <form method="POST" role="form" style="float: left">{{ form.hidden_tag() }}{{ wtf.form_field(form.switch) }}</form>
 </div>
 
 {% endblock %}

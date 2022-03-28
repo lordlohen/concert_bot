@@ -53,7 +53,7 @@ class NewAdForm(FlaskForm):
     area = TextAreaField('Text', validators=[DataRequired()])
     date = DateField('Date (Day-Month-Year)', format='%Y-%m-%d', validators=[DataRequired()])
     time = RadioField('Time', choices=['8:00', '12:00', '16:00', '20:00'])
-    submit = SubmitField('Add')
+    submit = SubmitField()
 
 
 class MessageForm(FlaskForm):
@@ -65,11 +65,42 @@ class AdSearchForm(FlaskForm):
     date = DateField('Search', format='%Y-%m-%d')
     search = SubmitField('Search')
 
+# ad_st
+
+
+class Ad:
+    ad_on = False
+    ad = 'Add: Off'
+
+    def change_ad_stat(self):
+        if self.ad_on:
+            # print('changed to true')
+            self.ad = 'Add: Off'
+            AdOnOff.switch.label = self.ad
+            self.ad_on = False
+        else:
+            # print('changed to false')
+            self.ad = 'Add: On'
+            AdOnOff.switch.label = self.ad
+            self.ad_on = True
+
+
+ad_stat = Ad()
+
+
+class AdOnOff(FlaskForm):
+    switch = SubmitField(label=ad_stat.ad)
+
 
 @app.route('/', methods=['GET', 'POST'])
 @check_login
 def index():
-    return render_template('index.html', users=get_all_users())
+    switch = AdOnOff()
+    switch.switch.label.text = ad_stat.ad
+    if switch.validate_on_submit():
+        ad_stat.change_ad_stat()
+        return redirect(url_for('index'))
+    return render_template('index.html', users=get_all_users(), form=switch)
 
 
 @app.route('/newad', methods=['GET', 'POST'])
