@@ -61,11 +61,14 @@ class MessageForm(FlaskForm):
     submit = SubmitField('Send')
 
 
+class EditForm(FlaskForm):
+    message = TextAreaField('Text', validators=[DataRequired()])
+    submit = SubmitField('Edit')
+
+
 class AdSearchForm(FlaskForm):
     date = DateField('Search', format='%Y-%m-%d')
     search = SubmitField('Search')
-
-# ad_st
 
 
 class Ad:
@@ -164,6 +167,35 @@ def ads(date=''):
     ads_list = sortads(ads_list)
 
     return render_template('ads.html', ads=ads_list, n=len(ads_list), form=form)
+
+
+@app.route('/delete/<msg>', methods=['GET'])
+@check_login
+def delete(msg):
+    date, time = str.split(msg, '.')
+    ads_base.delete(f'{date} {time}')
+
+    return redirect(url_for('ads', date=''))
+
+
+@app.route('/edit/<msg>', methods=['GET', 'POST'])
+@check_login
+def edit(msg=None):
+    form = EditForm()
+    date, time = str.split(msg, '.')
+    if form.validate_on_submit():
+        ads_base.hmset(f'{date} {time}', {
+            'text': str(form.message.data),
+            'date': str(date),
+            'time': str(time)
+        })
+        return redirect(url_for('ads', date=''))
+    for key in ads_base.scan_iter(f"{date}*"):
+        for i in ads_base.hscan(key):
+            if i != 0:
+                form.message.data = i.get(b'text').decode('utf-8')
+
+    return render_template('edit.html', form=form, date=date, time=time)
 
 
 @app.route('/send_msg', methods=['GET', 'POST'])

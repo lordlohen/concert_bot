@@ -1,0 +1,31 @@
+<body class="bg-primary bg-gradient">
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block title %}Edit Ad{% endblock %}
+{% block content %}
+<div style="position: absolute; right: 20px; top:20px">
+    <a href="{{url_for('logout')}}"><button type="button" class="btn btn-light">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+            <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+        </svg>
+    </button></a>
+</div>
+<div style="position: absolute; right: 70px; top:20px">
+    <a href="{{url_for('index')}}"><button type="button" class="btn btn-light">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" class="bi bi-chevron-double-left" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8.354 1.646a.5.5 0 0 1 0 .708L2.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+          <path fill-rule="evenodd" d="M12.354 1.646a.5.5 0 0 1 0 .708L6.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+        </svg>
+    </button></a>
+</div>
+<form style="width: 500px; height:200px; margin:15% auto;" method="POST" role="form">
+    <div style="width:400px; margin:0 auto;">
+    <h3>{{ date }} {{ time }}</h3>
+    {{ form.hidden_tag() }}
+    {{ wtf.form_field(form.message) }}
+    {{ wtf.form_field(form.submit) }}
+    </div>
+</form>
+{% endblock %}
+</body>
