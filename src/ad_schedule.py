@@ -26,6 +26,7 @@ def ad(ad_date, ad_time):
         for i in ads_base.hscan(key):
             if i != 0:
                 send_message_to_users(i.get(b'text').decode('utf-8'))
+        ads_base.delete(f'{ad_date.year}-{ad_month}-{ad_day} {ad_time}')
     if c == 0:
         send_message_to_users('Здесь могла быть Ваша реклама!')
 
