@@ -13,11 +13,6 @@ locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
 red = redis.Redis(host='localhost', port=6379, db=1, password=None, socket_timeout=None)
 redis_users = redis.Redis(host='localhost', port=6379, db=2, password=None, socket_timeout=None)
 
-
-# print(len(red.keys()))
-# for key in red.scan_iter(f"*:rock:*:*"):
-#     print(key)
-
 token = '5055960243:AAE0ZNGoZnO0BeqEMxGnLrSf9jEyiCTlGR0'
 bot = telebot.TeleBot(token, threaded=True)
 
@@ -62,6 +57,11 @@ class States:
     search = 4
 
 
+def check_user(u_id):
+    if u_id not in redis_users.scan_iter(f'user:{u_id}'):
+        redis_users.set(name=f'user:{u_id}', value=u_id)
+
+
 def send_message_to_users(msg):
     for i in redis_users.scan_iter('*'):
         id = i.decode('utf-8')[5::]
@@ -74,8 +74,7 @@ def get_all_users():
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    if message.from_user.id not in redis_users.scan_iter(f'user:{message.from_user.id}'):
-        redis_users.set(name=f'user:{message.from_user.id}', value=message.from_user.id)
+    check_user(message.from_user.id)
     with bot.retrieve_data(message.from_user.id) as data:
         data['city'] = ''
     bot.send_message(message.from_user.id, greeting)
@@ -83,6 +82,7 @@ def start(message):
 
 @bot.message_handler(commands="city")
 def city(message):
+    check_user(message.from_user.id)
     city_markup = types.ReplyKeyboardMarkup()
     cities_btn = []
     for c in range(len(cities)):
@@ -94,6 +94,7 @@ def city(message):
 
 @bot.message_handler(state=States.city_changed)
 def city_changed(message):
+    check_user(message.from_user.id)
     with bot.retrieve_data(message.from_user.id) as data:
         data['city'] = cities_code[cities.index(message.text)]
         print(data['city'])
@@ -104,6 +105,7 @@ def city_changed(message):
 
 @bot.message_handler(commands="search", state=States.search)
 def search(message):
+    check_user(message.from_user.id)
     genre_markup = types.ReplyKeyboardMarkup()
     genre_1 = types.KeyboardButton('Фольклорные мероприятия')
     genre_2 = types.KeyboardButton('Танец')
@@ -134,6 +136,7 @@ def search(message):
 
 @bot.message_handler(state=States.genre)
 def get_genre(message):
+    check_user(message.from_user.id)
     markup = types.ReplyKeyboardRemove()
     bot.send_message(message.from_user.id, choice_date, reply_markup=markup)
     bot.set_state(message.from_user.id, States.date)
@@ -144,6 +147,7 @@ def get_genre(message):
 
 @bot.message_handler(state=States.date)
 def get_date(message):
+    check_user(message.from_user.id)
     with bot.retrieve_data(message.from_user.id) as data:
         bot.send_message(message.from_user.id, f"Ищем билеты {data['genre']}...")
         if message.text != '/search':
@@ -154,7 +158,6 @@ def get_date(message):
 
 
 def scrap(message):
-
     bot.send_message(message.from_user.id, 'Еще немного...')
     show_concerts(message)
 
@@ -184,13 +187,10 @@ def show_concerts(message):
             dateList.append(f'{day} {month.capitalize()}')
 
         for date in dateList:
-            # print(f'DEBUG: {date}')
-            # print(f"DEBUG: {data['city']}:{data['genre']}:{date}:*")
-            for key in red.scan_iter(f"{data['city']}:{data['genre']}:{date}*:*"):
-                print(f'DEBUG: {key}')
+
+            for key in red.scan_iter(f"{data['city']}*:{data['genre']}:{date}*:*"):
                 for i in red.hscan(key):
                     if i != 0:
-                        print(f'DEBUG: {i}')
                         d.append(i)
 
         for t in range(len(d)):
@@ -219,5 +219,5 @@ def show_concerts(message):
 if __name__ == '__main__':
     bot.add_custom_filter(custom_filters.StateFilter(bot))
     bot.enable_saving_states()
-
     bot.polling(none_stop=True, interval=0)
+
