@@ -16,8 +16,7 @@ redis_users = redis.Redis(host='localhost', port=6379, db=2, password=None, sock
 token = '5055960243:AAE0ZNGoZnO0BeqEMxGnLrSf9jEyiCTlGR0'
 bot = telebot.TeleBot(token, threaded=True)
 
-greeting = "Приветствую, тебя путник. Я помогу тебе выбрать концерт в Питере.\n" \
-           "Для поиска используй команду /search"
+greeting = "Для поиска используй команду /search"
 
 choice_city = "Выберите город"
 choice_genre = "Выберите жанр мероприятия:"
@@ -58,8 +57,17 @@ class States:
 
 
 def check_user(u_id):
-    if u_id not in redis_users.scan_iter(f'user:{u_id}'):
-        redis_users.set(name=f'user:{u_id}', value=u_id)
+    j = 0
+    for key in redis_users.scan_iter(f'user:{u_id}'):
+        for i in redis_users.hscan(key):
+            if i != 0:
+                j += 1
+    if j == 0:
+        name = f'user:{u_id}'
+        redis_users.hmset(name,
+                          {
+                              'city': ' '
+                          })
 
 
 def send_message_to_users(msg):
@@ -75,8 +83,6 @@ def get_all_users():
 @bot.message_handler(commands=["start"])
 def start(message):
     check_user(message.from_user.id)
-    with bot.retrieve_data(message.from_user.id) as data:
-        data['city'] = ''
     bot.send_message(message.from_user.id, greeting)
 
 
@@ -95,15 +101,16 @@ def city(message):
 @bot.message_handler(state=States.city_changed)
 def city_changed(message):
     check_user(message.from_user.id)
-    with bot.retrieve_data(message.from_user.id) as data:
-        data['city'] = cities_code[cities.index(message.text)]
-        print(data['city'])
+    redis_users.hmset(f'user:{message.from_user.id}',
+                      {
+                          'city': cities_code[cities.index(message.text)]
+                      })
     markup = types.ReplyKeyboardRemove()
-    bot.set_state(message.from_user.id, States.search)
+    bot.delete_state(message.from_user.id)
     bot.send_message(message.from_user.id, "Город выбран!\n Введите /search что бы начать поиск!", reply_markup=markup)
 
 
-@bot.message_handler(commands="search", state=States.search)
+@bot.message_handler(commands="search")
 def search(message):
     check_user(message.from_user.id)
     genre_markup = types.ReplyKeyboardMarkup()
@@ -142,7 +149,6 @@ def get_genre(message):
     bot.set_state(message.from_user.id, States.date)
     with bot.retrieve_data(message.from_user.id) as data:
         data['genre'] = genres_code[genres.index(message.text)]
-        print(data['genre'])
 
 
 @bot.message_handler(state=States.date)
@@ -152,8 +158,7 @@ def get_date(message):
         bot.send_message(message.from_user.id, f"Ищем билеты {data['genre']}...")
         if message.text != '/search':
             data['date'] = message.text
-        print(data['date'])
-    # bot.register_next_step_handler(message, scrap)
+
     scrap(message)
 
 
@@ -164,7 +169,6 @@ def scrap(message):
 
 def show_concerts(message):
     with bot.retrieve_data(message.from_user.id) as data:
-        print(data)
         d = []
         dateList = []
 
@@ -186,12 +190,22 @@ def show_concerts(message):
             day, month = day.strftime('%d %b').split(' ')
             dateList.append(f'{day} {month.capitalize()}')
 
+        u_city = ''
+
+        for key in redis_users.scan_iter(f'user:{message.from_user.id}'):
+            for i in redis_users.hscan(key):
+                if i != 0:
+                    u_city = i.get(b'city').decode('utf-8')
+
         for date in dateList:
 
-            for key in red.scan_iter(f"{data['city']}*:{data['genre']}:{date}*:*"):
+            for key in red.scan_iter(f"{u_city}*:{data['genre']}:{date}*:*"):
                 for i in red.hscan(key):
                     if i != 0:
                         d.append(i)
+
+        if len(d) == 0:
+            bot.send_message(message.from_user.id, 'К сожалению ничего не найдено!')
 
         for t in range(len(d)):
             print('-', end='')
@@ -210,7 +224,7 @@ def show_concerts(message):
                                                               f"{d[t].get(b'cost').decode('utf-8')}",
                            reply_markup=markup)
             img.close()
-            if len(d)>10:
+            if len(d) > 10:
                 time.sleep(1)
             else:
                 time.sleep(0.5)
@@ -220,4 +234,3 @@ if __name__ == '__main__':
     bot.add_custom_filter(custom_filters.StateFilter(bot))
     bot.enable_saving_states()
     bot.polling(none_stop=True, interval=0)
-
